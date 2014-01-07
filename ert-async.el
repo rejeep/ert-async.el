@@ -60,22 +60,29 @@ will fail with that error string.
 
 BODY is the actual test."
   (declare (indent 2))
-  `(ert-deftest ,name nil
-     (let ((callbacks-left (length ',callbacks)))
-       (let ,callbacks
-         (mapc
-          (lambda (callback)
-            (set callback (lambda (&optional error-message)
-                            (if error-message
-                                (error error-message)
-                              (setq callbacks-left (1- callbacks-left))))))
-          ',callbacks)
+  (let ((varlist
+         (cons
+          'callbacked
+          (mapcar
+           (lambda (callback)
+             (list
+              callback
+              `(lambda (&optional error-message)
+                 (if error-message
+                     (ert-fail (format "Callback %s invoked with argument: %s" ',callback error-message))
+                   (if (member ',callback callbacked)
+                       (ert-fail (format "Callback %s called multiple times" ',callback))
+                     (push ',callback callbacked))))))
+           callbacks))))
+    `(ert-deftest ,name ()
+       (let* ,varlist
          (with-timeout
              (ert-async-timeout
-              (error "Timeout exceeded and %d callbacks did not callback" callbacks-left))
+              (ert-fail (format "Timeout of %ds exceeded" ert-async-timeout)))
            ,@body
-           (while (> callbacks-left 0)
-             (accept-process-output nil 0.005)))))))
+           (while (not (equal (sort (mapcar 'symbol-name callbacked) 'string<)
+                              (sort (mapcar 'symbol-name ',callbacks) 'string<)))
+             (accept-process-output nil 0.05)))))))
 
 (provide 'ert-async)
 
