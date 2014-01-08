@@ -1,4 +1,4 @@
-;;; ert-async.el --- Async support for ERT
+;;; ert-async.el --- Async support for ERT -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014 Johan Andersson
 
