@@ -29,8 +29,8 @@ An example. When the function `async-call` callbacks, the functions
 
 ```lisp
 (ert-deftest-async my-async-test (done-1 done-2)
-  (async-call done-1)
-  (async-call done-2))
+  (async-call-1 done-1)
+  (async-call-2 done-2))
 ```
 
 Note that if a callback function is called with a string as argument,
