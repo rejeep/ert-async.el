@@ -44,6 +44,17 @@ be written as:
   (async-call-2 (lambda () (funcall done-2))))
 ```
 
+Passing a string as argument to a callback function can be useful when
+you don't want a function to callback, for example:
+
+```lisp
+(ert-deftest-async my-async-test (done)
+  (async-call
+   (lambda ()
+     (funcall done "should not callback, but did")))
+  (funcall done))
+```
+
 ## Contribution
 
 Contribution is much welcome!
