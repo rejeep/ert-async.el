@@ -14,7 +14,8 @@ Add `ert-async` to your [Cask](https://github.com/cask/cask) file:
 Add this to get font locking for `ert-deftest-async`:
 
 ```lisp
-(add-to-list 'emacs-lisp-mode-hook 'ert-async-activate-font-lock-keywords)
+(remove-hook 'emacs-lisp-mode-hook 'ert--activate-font-lock-keywords)
+(add-hook 'emacs-lisp-mode-hook 'ert-async-activate-font-lock-keywords)
 ```
 
 ## Usage
