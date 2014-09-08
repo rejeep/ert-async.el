@@ -40,7 +40,7 @@
   "Activate font-lock keywords for `ert-deftest-async'."
   (font-lock-add-keywords
    nil
-   '(("(\\(\\<ert-deftest-async\\)\\>\\s *\\(\\sw+\\)?"
+   '(("(\\(\\<ert-deftest\\(?:-async\\)?\\)\\>\\s *\\(\\(?:\\sw\\|\\s_\\)+\\)?"
       (1 font-lock-keyword-face nil t)
       (2 font-lock-function-name-face nil t)))))
 
