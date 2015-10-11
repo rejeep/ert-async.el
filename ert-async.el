@@ -78,7 +78,10 @@ BODY is the actual test."
        (let* ,varlist
          (with-timeout
              (ert-async-timeout
-              (ert-fail (format "Timeout of %ds exceeded" ert-async-timeout)))
+              (ert-fail (format "Timeout of %ds exceeded. Expected the functions [%s] to be called, but was [%s]."
+                                ert-async-timeout
+                                ,(mapconcat 'symbol-name callbacks " ")
+                                (mapconcat 'symbol-name callbacked " "))))
            ,@body
            (while (not (equal (sort (mapcar 'symbol-name callbacked) 'string<)
                               (sort (mapcar 'symbol-name ',callbacks) 'string<)))
