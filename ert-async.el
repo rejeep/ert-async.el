@@ -5,8 +5,9 @@
 ;; Author: Johan Andersson <johan.rejeep@gmail.com>
 ;; Maintainer: Johan Andersson <johan.rejeep@gmail.com>
 ;; Version: 0.1.2
-;; Keywords: test
+;; Keywords: lisp test
 ;; URL: http://github.com/rejeep/ert-async.el
+;; Package-Requires: ((emacs "24.1"))
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -28,6 +29,8 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;;; Commentary:
+
+;; Async support for ERT
 
 ;;; Code:
 
