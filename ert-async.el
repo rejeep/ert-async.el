@@ -47,6 +47,16 @@
       (1 font-lock-keyword-face nil t)
       (2 font-lock-function-name-face nil t)))))
 
+(defun ert-async--has-duplicate (lst)
+  "Return non-nil if LST has duplicate symbol.
+If found duplicate symbol, return those symbols."
+  (let (uniqlst duplst)
+    (dolist (elm lst)
+      (if (memq elm uniqlst)
+          (push elm duplst)
+        (push elm uniqlst)))
+    duplst))
+
 (defmacro ert-deftest-async (name callbacks &rest body)
   "Like `ert-deftest' but with support for async.
 
@@ -63,32 +73,38 @@ will fail with that error string.
 
 BODY is the actual test."
   (declare (indent 2))
-  (let ((varlist
-         (cons
-          'callbacked
-          (mapcar
-           (lambda (callback)
-             (list
-              callback
-              `(lambda (&optional error-message)
-                 (if error-message
-                     (ert-fail (format "Callback %s invoked with argument: %s" ',callback error-message))
-                   (if (member ',callback callbacked)
-                       (ert-fail (format "Callback %s called multiple times" ',callback))
-                     (push ',callback callbacked))))))
-           callbacks))))
-    `(ert-deftest ,name ()
-       (let* ,varlist
-         (with-timeout
-             (ert-async-timeout
-              (ert-fail (format "Timeout of %ds exceeded. Expected the functions [%s] to be called, but was [%s]."
-                                ert-async-timeout
-                                ,(mapconcat 'symbol-name callbacks " ")
-                                (mapconcat 'symbol-name callbacked " "))))
-           ,@body
-           (while (not (equal (sort (mapcar 'symbol-name callbacked) 'string<)
-                              ',(sort (mapcar 'symbol-name callbacks) 'string<)))
-             (accept-process-output nil 0.05)))))))
+  (let ((dups (ert-async--has-duplicate callbacks)))
+    (if dups
+        `(ert-deftest ,name ()
+           (ert-fail (format "Callbacks [%s] duplicated in callbacks [%s]."
+                             ,(mapconcat 'symbol-name dups " ")
+                             ,(mapconcat 'symbol-name callbacks " "))))
+      (let ((varlist
+             (cons
+              'callbacked
+              (mapcar
+               (lambda (callback)
+                 (list
+                  callback
+                  `(lambda (&optional error-message)
+                     (if error-message
+                         (ert-fail (format "Callback %s invoked with argument: %s" ',callback error-message))
+                       (if (member ',callback callbacked)
+                           (ert-fail (format "Callback %s called multiple times" ',callback))
+                         (push ',callback callbacked))))))
+               callbacks))))
+        `(ert-deftest ,name ()
+           (let* ,varlist
+             (with-timeout
+                 (ert-async-timeout
+                  (ert-fail (format "Timeout of %ds exceeded. Expected the functions [%s] to be called, but was [%s]."
+                                    ert-async-timeout
+                                    ,(mapconcat 'symbol-name callbacks " ")
+                                    (mapconcat 'symbol-name callbacked " "))))
+               ,@body
+               (while (not (equal (sort (mapcar 'symbol-name callbacked) 'string<)
+                                  ',(sort (mapcar 'symbol-name callbacks) 'string<)))
+                 (accept-process-output nil 0.05)))))))))
 
 (provide 'ert-async)
 
