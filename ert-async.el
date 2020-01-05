@@ -87,7 +87,7 @@ BODY is the actual test."
                                 (mapconcat 'symbol-name callbacked " "))))
            ,@body
            (while (not (equal (sort (mapcar 'symbol-name callbacked) 'string<)
-                              (sort (mapcar 'symbol-name ',callbacks) 'string<)))
+                              ',(sort (mapcar 'symbol-name callbacks) 'string<)))
              (accept-process-output nil 0.05)))))))
 
 (provide 'ert-async)
